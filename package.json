@@ -9,8 +9,10 @@
     "audit": "0.0.6",
     "bootstrap-icons": "^1.0.0-alpha4",
     "cookie-parser": "~1.4.3",
+    "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "express-fileupload": "^1.1.7-alpha.3",
     "fix": "0.0.6",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
@@ -22,5 +24,8 @@
     "nodemon": "^2.0.4",
     "pdf-parse": "^1.1.1",
     "pdf2html": "^2.5.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0"
   }
 }

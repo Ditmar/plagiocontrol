@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="/stylesheets/style.css">
+<div class="alert alert-primary" role="alert">
+    <p>
+        Suba el documento pdf del trabajo que desea revisar,
+        el sistema verifica similaridad, de los documentos contenidos en la base de datos,
+        ya depende del tutor tomar decisiones sobre dicho trabajo.
+        <br>
+        Como se copia o plágio.
+        
+    </p>
+  </div>
+
+<form action="" method="post">
+    <div class="upload-drop-zone" id="drop-zone">
+        <div id="defaultmsn">
+          Arrastra el pdf de la tesis que quiere revisar
+        </div>
+        <ul class="filesicon">
+          
+        </ul>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</form>
+<script src="/js/uploadui.js" type="module"></script>
+<script type="module">
+  import { UploadUi } from  "/js/uploadui.js";
+  var p = new UploadUi("/server/uploadreview");
+</script>

@@ -4,10 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var mustacheExpress = require('mustache-express');
 var logger = require('morgan');
-
+var fileupload = require('express-fileupload');
 var apiclient = require ('./routes/apiclient/index')
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var serverRouter = require('./routes/server/index');
+var usersRouter = require('./routes/server/users');
 
 var app = express();
 
@@ -23,7 +23,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', apiclient);
+app.use("/server", serverRouter);
 app.use('/users', usersRouter);
+
+//Upload File
+app.use(fileupload({
+  limits: { fileSize: 12 * 1024 * 1024 },
+}));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

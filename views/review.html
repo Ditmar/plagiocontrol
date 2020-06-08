@@ -1,0 +1,23 @@
+<div class="alert alert-primary" role="alert">
+  <h4 class="alert-heading">Well done!</h4>
+  <p>Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
+  <hr>
+  <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
+</div>
+<link rel="stylesheet" href="/stylesheets/style.css">
+<form action="" method="post">
+    <div class="upload-drop-zone" id="drop-zone">
+        <div id="defaultmsn">
+          Arrastra el pdf de la tesis que quiere revisar
+        </div>
+        <ul class="filesicon">
+          
+        </ul>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+</form>
+<script src="/js/uploadui.js" type="module"></script>
+<script type="module">
+  import { UploadUi } from  "/js/uploadui.js";
+  var p = new UploadUi("/server/upload");
+</script>

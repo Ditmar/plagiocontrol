@@ -13,6 +13,10 @@ var tesisSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    realpathCover: {
+        type: String,
+        default: ""
+    },
     photo: String,
     abstract: String,
     pages: Array,

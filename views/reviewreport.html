@@ -1,0 +1,50 @@
+<link rel="stylesheet" href="/stylesheets/style.css">
+<div class="alert alert-secondary" role="alert">
+    Se  revisaron {{numberpages}} páginas.
+    y se han encontrado las siguientes coicidencias  
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Coincidencias</th>
+            <th>
+                Titulo del trabajo con quien coincide.
+            </th>
+            <th>
+                Autor
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#copy}}
+        <tr>
+            <td>
+                1
+            </td>
+            <td>
+                <table class="table table-striped table-inverse table-responsive">
+                    <thead class="thead-inverse">
+                        <tr>
+                            <th>Documento</th>
+                            <th>Documento Coincidencia</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {{#data}}
+                            <tr>
+                                <td>{{linesmatch}} <span class="badge badge-secondary badge-pill">{{currentpage}}</span></td>
+                                <td>{{{originaltxt.matchtext}}}
+                                    <span class="badge badge-secondary badge-pill">{{originaltxt.page}}</span></td>
+                                </td> 
+                            </tr>
+                            {{/data}}
+                        </tbody>
+                </table>
+            </td>
+            <td>{{title}}</td>
+            <td>{{autor}}</td>
+        </tr>
+        {{/copy}}
+    </tbody>
+</table>

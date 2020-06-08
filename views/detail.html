@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="/stylesheets/style.css">
+<div id="portada">
+  <div class="row">
+    <div class="col-lm">
+      <img src="/server{{portada}}" alt="" width="350px">
+    </div>
+    <div class="col-sm">
+      <form action="">
+        <div class="form-group">
+          <label for="">Titulo del trabajo</label>
+          <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="" value="{{title}}">
+          <small id="helpId" class="form-text text-muted">Puede actualizar el título si lo ve conveniente</small>
+        </div>
+        <div class="form-group">
+          <label for="">Autor del trabajo</label>
+          <input type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="" value="{{autor}}">
+          <small id="helpId" class="form-text text-muted">Puede actualizar el autor de ser incorrecta la extracción</small>
+        </div>
+        <div class="form-group">
+          <label for="">Número de páginas procesadas</label>
+          <input disabled  type="text" class="form-control" name="" id="" aria-describedby="helpId" placeholder="" value="{{numberpage}}">
+          <small id="helpId" class="form-text text-muted"></small>
+        </div>
+        <div class="form-group">
+          <label for="">Resumen</label>
+          <div class="form-group">
+            <label for=""></label>
+            <textarea class="form-control" name="" id="" rows="10">{{abstrac}}</textarea>
+          </div>
+          <small id="helpId" class="form-text text-muted"></small>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Información</button>
+      </form>
+      
+    </div>
+    
+  </div>
+</div>
+
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Paginas</th>
+      <th scope="col">Ver</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#content}}
+    <tr>
+      <td>#</td>
+      <td>{{.}}</td>
+      <td>@see</td>
+    </tr>
+    {{/content}}
+  </tbody>
+</table>
