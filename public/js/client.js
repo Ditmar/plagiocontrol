@@ -1,6 +1,6 @@
 class ApiClient {
   constructor() {
-    this.mainmenu = document.querySelectorAll(".nav .nav-item .nav-link");
+    this.mainmenu = document.querySelectorAll("a");
     this.contenthtml = document.getElementById("maincontent");
     this.root = "HOLA AMIGOS";
     this.renderPage();
@@ -33,7 +33,7 @@ class ApiClient {
 }
   renderPage() {
     var uri = document.location.href;
-    var check = uri.match(/\#\/\w+/g);
+    var check = uri.match(/\#\/.+/g);
     var url = "/";
     if (check) {
       var ur = check[0].replace(/\#/, "");

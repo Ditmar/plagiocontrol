@@ -37,10 +37,20 @@ class UploadUi {
             var type = files[0].type;
             var realsize = (files[0].size / 1024) / 1024;
             var size = Math.round(realsize * 100) / 100;
-            if (type.match(/pdf/g) != null) {
+            var badformat = true;
+            var typeformat = "/img/pdf.png";
+            if (type.match(/pdf/g) == null) {
+              badformat = false;
+            }
+            if (type.match(/jpg/g) == null) {
+              badformat = false;
+              typeformat = "/img/jpg.png"
+            }
+            if (!badformat) {
                 this.defaultmsn.style.display = "none";
+
                 var htmlpoint = `<li>
-                <img src="/img/pdf.png" alt="">
+                <img src="${typeformat}" alt="">
                 <div id="filename">
                   ${name}
                 </div>

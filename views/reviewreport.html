@@ -3,17 +3,25 @@
     Se  revisaron {{numberpages}} páginas.
     y se han encontrado las siguientes coicidencias  
 </div>
+<div>
+    <h1>
+        Reporte
+    </h1>
+    <span>
+        <b>{{reviewtotal}}</b> Oraciones que tienen coincidencia. 
+
+    </span>
+    <span>
+       de un total de <b>{{pagetotal}}  oraciones revisadas </b>
+    </span>
+    <canvas id="chart-0" style="display: block; height: 357px; width: 714px;">
+    </canvas>
+</div>
 <table class="table">
     <thead>
         <tr>
             <th>#</th>
             <th>Coincidencias</th>
-            <th>
-                Titulo del trabajo con quien coincide.
-            </th>
-            <th>
-                Autor
-            </th>
         </tr>
     </thead>
     <tbody>
@@ -26,25 +34,32 @@
                 <table class="table table-striped table-inverse table-responsive">
                     <thead class="thead-inverse">
                         <tr>
-                            <th>Documento</th>
-                            <th>Documento Coincidencia</th>
+                            <th>Documento en revisión</th>
+                            <th>Documento Coincidencia encontrada</th>
                         </tr>
                         </thead>
                         <tbody>
                             {{#data}}
                             <tr>
-                                <td>{{linesmatch}} <span class="badge badge-secondary badge-pill">{{currentpage}}</span></td>
+                                <td>{{{currentdoc}}} <span class="badge badge-secondary badge-pill">Página: {{currentpage}}</span></td>
                                 <td>{{{originaltxt.matchtext}}}
-                                    <span class="badge badge-secondary badge-pill">{{originaltxt.page}}</span></td>
+                                    <span class="badge badge-secondary badge-pill">Página: {{originaltxt.page}}</span></td>
                                 </td> 
                             </tr>
                             {{/data}}
                         </tbody>
                 </table>
             </td>
-            <td>{{title}}</td>
-            <td>{{autor}}</td>
         </tr>
         {{/copy}}
     </tbody>
 </table>
+<script>
+    var data = {datasets: [{data: [`{{graph.review}}`, `{{graph.nonereview}}`], backgroundColor: ['rgba(255, 99, 132, 0.5)','rgba(54, 162, 235, 0.5)'],}]};
+	var options = {legend: false, tooltips: false};
+    var chart = new Chart('chart-0', { 
+        type: 'pie', 
+        data: data, 
+        options: options});
+    chart.update();
+</script>

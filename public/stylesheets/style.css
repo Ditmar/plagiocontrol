@@ -69,3 +69,14 @@
   padding: 5px;
   border-radius: 3px;
 }
+#resaltar2{
+  background-color: cyan;
+  padding: 5px;
+  border-radius: 3px;
+}
+img {
+  padding: 10px;
+  text-align: center;
+  display: block;
+  margin: auto;
+}

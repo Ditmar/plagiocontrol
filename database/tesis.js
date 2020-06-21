@@ -18,7 +18,10 @@ var tesisSchema = new mongoose.Schema({
         default: ""
     },
     photo: String,
+    pathphoto: String,
     abstract: String,
+    modalidad: String,
+    unidad: String,
     pages: Array,
     filepdf: String,
     md5: String
