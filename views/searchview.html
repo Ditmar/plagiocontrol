@@ -1,0 +1,39 @@
+Busqueda para:  <b>{{search}}</b> y {{cant}} resultados encontrados
+
+<table>
+    {{#result}}
+    <tr>
+        <td>
+            <img class="storySearchImage" src="/server{{coverpage}}" alt="" width="200">
+        </td>
+        <td>
+            <div class="storySearchTitle">
+                {{{title}}}
+            </div>
+            <div class="storySearchAutor">
+                Autor: {{{autor}}}
+            </div>
+            <div class="storySearchSummary">
+                <b>RESUMEN:</b>
+                <p>
+                    {{{abstract}}}
+                </p>
+                <a href="/server/viewdoc/{{md5}}" target="_blank" id="readmore"> VER EN DETALLE</a>
+                <hr>
+            </div>
+        </td>
+    </tr>
+    {{/result}}
+</table>
+<script>
+    $(document).ready(() => {
+        $(".storySearchSummary p").each((item, d) => {
+            console.log(d.innerHTML.toString());
+            var data = d.innerHTML;
+            $(this).html(data.substr(0, 350) + "...");
+        });
+        //var data = $(".storySearchSummary p").html();
+        //$(".storySearchSummary p").html(data.substr(1, 350) + "...");
+    });
+    
+</script>

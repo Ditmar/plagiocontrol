@@ -4,8 +4,6 @@
         Suba el documento pdf del trabajo que desea revisar,
         el sistema verifica similaridad, de los documentos contenidos en la base de datos,
         ya depende del tutor tomar decisiones sobre dicho trabajo.
-        <br>
-        Como se copia o plágio.
         
     </p>
   </div>
@@ -19,10 +17,14 @@
           
         </ul>
     </div>
-    <button type="submit" class="btn btn-primary">Enviar</button>
+    <button type="submit" id="sendbtn" class="btn btn-primary">Enviar</button>
 </form>
-<script src="/js/uploadui.js" type="module"></script>
 <script type="module">
   import { UploadUi } from  "/js/uploadui.js";
-  var p = new UploadUi("/server/uploadreview");
+  //var socket = io();
+  var p = new UploadUi("/server/uploadreview", SOCKETDATA, (data) => {
+    
+    $("#maincontent").html(data);
+  });
+  
 </script>

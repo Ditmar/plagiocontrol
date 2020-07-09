@@ -14,10 +14,12 @@
         <ul class="filesicon">
         </ul>
     </div>
-    <button type="submit" class="btn btn-primary">Enviar</button>
+    <button type="submit" id="sendbtn" class="btn btn-primary">Enviar</button>
 </form>
 <script src="/js/uploadui.js" type="module"></script>
 <script type="module">
   import { UploadUi } from  "/js/uploadui.js";
-  var p = new UploadUi("/server/upload");
+  var p = new UploadUi("/server/upload", SOCKETDATA, (data) => {
+    $("#maincontent").html(data);
+  });
 </script>

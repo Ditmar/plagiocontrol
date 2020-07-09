@@ -1,25 +1,60 @@
-<table class="table">
+<div class="container" id="filter_data">
+  <form action="#" id="searchform" method="POST">
+    <div class="row">
+      <div class="col-sm">
+        <select class="form-control" name="modalidad" id="modalidad" value="{{modalidad}}">
+          <option value="Todo.">Todo.</option>
+          <option value="Tesis">Tesis</option>
+          <option value="Proyecto de Grado">Proyecto de Grado</option>
+          <option value="Monografías">Monografías</option>
+        </select>
+      </div>
+      <div class="col-sm">
+        <select class="form-control" name="unidad" id="unidad" value="{{unidad}}">
+          <option value="Todo.">Todo.</option>
+          <option value="Ninguno.">FATECIPOL (Fac. Técnica, pregrado).</option>
+          <option value="ANAPOL (Pregrado).">ANAPOL (Pregrado).</option>
+          <option value="CEFOTES (Posgrado).">CEFOTES (Posgrado).</option>
+          <option value="ESCUELA SUPERIOR (Posgrado).">ESCUELA SUPERIOR (Posgrado).</option>
+        </select>
+      </div>
+      <div class="col-sm">
+        <input type="text" class="form-control" id="search" name="search" aria-describedby="emailHelp" placeholder="Buscar">
+      </div>
+      <div class="col-sm">
+        <button type="submit" class="btn btn-primary">Listar</button>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="table-responsive-lg">
+  <table class="table table-borderless">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
         <th scope="col">Portada</th>
-        <th scope="col">Titulo del trabajo de investigación<svg class="bi bi-arrow-up-short" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z"/>
-            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8 5.707 5.354 8.354a.5.5 0 1 1-.708-.708l3-3z"/>
-          </svg></th></th>
+        <th scope="col">Titulo del trabajo de investigación<svg class="bi bi-arrow-up-short" width="1em" height="1em"
+            viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z" />
+            <path fill-rule="evenodd"
+              d="M7.646 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8 5.707 5.354 8.354a.5.5 0 1 1-.708-.708l3-3z" />
+          </svg></th>
+        </th>
         <th scope="col">Autor</th>
         <th scope="col">Modalidad</th>
         <th scope="col">Unidad Académica</th>
         <th scope="col">Cantidad de Páginas</th>
         <th scope="col">Ver Trabajo</th>
-        <th scope="col">Descargar Trabajo<svg class="bi bi-arrow-up-short" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z"/>
-            <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8 5.707 5.354 8.354a.5.5 0 1 1-.708-.708l3-3z"/>
+        <th scope="col">Descargar Trabajo<svg class="bi bi-arrow-up-short" width="1em" height="1em" viewBox="0 0 16 16"
+            fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z" />
+            <path fill-rule="evenodd"
+              d="M7.646 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8 5.707 5.354 8.354a.5.5 0 1 1-.708-.708l3-3z" />
           </svg></th>
       </tr>
     </thead>
     <tbody>
-        {{#data}}
+      {{#data}}
       <tr>
         <th scope="row">{{number}}</th>
         <td><img src="/server{{coverpage}}" alt="" width="200px"></td>
@@ -31,26 +66,68 @@
               <p class="card-text">{{autor}}</p>
             </div>
           </div>
-          
+  
         </td>
         <td>{{modalidad}}</td>
         <td>{{unidad}}</td>
         <td>{{numpage}}</td>
         <td>
-            <a href="/#/detail/?id={{_id}}">Editar</a>
+          <a href="/#/detail/?id={{_id}}">Editar</a>
         </td>
         <td>
-            <svg class="bi bi-arrow-down-circle-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 5a.5.5 0 0 0-1 0v4.793L5.354 7.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.793V5z"/>
-              </svg>
+          <a href="/server/viewdoc/{{md5}}" target="_blank">
+            <svg class="bi bi-arrow-down-circle-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 5a.5.5 0 0 0-1 0v4.793L5.354 7.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.793V5z" />
+          </svg>
+          </a>
+          
         </td>
       </tr>
       {{/data}}
     </tbody>
   </table>
-  <script>
-    window.addEventListener("hashchange", () => {
-      console.log("TEST");
-      location.reload();
-    });
-  </script>
+</div>
+
+<script>
+  if ("{{form.modalidad}}" != "") {
+    document.getElementById("modalidad").value = "{{form.modalidad}}";
+  }
+  if ("{{form.modalidad}}" != "") {
+    document.getElementById("unidad").value = "{{form.unidad}}";
+  }
+  if ("{{form.modalidad}}" != "") {
+    document.getElementById("search").value = "{{form.search}}";
+  }
+  window.addEventListener("hashchange", () => {
+    console.log("TEST");
+    location.reload();
+  });
+  var formToJSON = elements => [].reduce.call(elements, (data, element) => {
+    data[element.name] = element.value;
+    return data;
+  }, {});
+  var formdata = document.getElementById("searchform");
+  formdata.addEventListener("submit", (e) => {
+    e.preventDefault();
+    var data = formToJSON(formdata.elements);
+    console.log(data);
+    fetch("/server/listdatabase", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then(
+      response => response.text()// if the response is a JSON object
+    ).then(
+      success => {
+        
+        $("#maincontent").html(success);
+        
+      }
+    );
+  });
+</script>

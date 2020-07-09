@@ -1,4 +1,19 @@
 var express = require("express");
+var http = require("http").createServer(express());
+var mongoose = require("../../database/connect");
+var Schema = mongoose.Schema;
+var io = require("socket.io")(http);
+var thingSchema = new Schema({}, { strict: false });
+var REPORT = mongoose.model("report", thingSchema);
+http.listen(3000, () => {
+  console.log("SOCKET ON " + 3000);
+});
+io.on("connection", (socket) => {
+  console.log("usuario Conectado");
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+});
 const fs = require("fs");
 var pdf2html = require("pdf2html");
 var md5 = require("md5");
@@ -9,12 +24,59 @@ const options = { text: true };
 var router = express.Router();
 var TESIS = require("../../database/tesis");
 var PAGES = require("../../database/page");
-var path = "/Users/Ditmar/sistema/police/pdffiles/taha.pdf";
 /* GET home page. */
 router.use(fileUpload());
-router.get("/search", (req, res) => {
-  /*var criterio = 
-  TESIS.find({pagecontent: //});*/
+function puttagObjects(objs, key, expresion, cad) {
+  var newobjs = objs.map((item) => {
+    item[key] = item[key].replace(expresion, "<b>" + cad + "</b>");
+    return item;
+  });
+  return newobjs;
+}
+router.post("/search", async (req, res) => {
+  console.log("--------->");
+  var data = req.body;
+  console.log(data);
+  if (data.searchcriterion == null) {
+    res.render("searchview", {
+      result: "Es necesario un criterio de busqueda",
+    });
+    return;
+  }
+  var criteria = data.searchcriterion;
+  //search by name
+  var searchcriterion = new RegExp(data.searchcriterion, "g");
+
+  var results = await TESIS.find({ autor: searchcriterion });
+  if (results.length == 0) {
+    var results = await TESIS.find({ title: searchcriterion });
+    if (results.length == 0) {
+      var results = await TESIS.find({ abstract: searchcriterion });
+      results = puttagObjects(results, "abstract", searchcriterion, criteria);
+      res.render("searchview", {
+        search: data.searchcriterion,
+        result: results,
+        cant: results.length,
+      });
+      return;
+    }
+    results = puttagObjects(results, "title", searchcriterion, criteria);
+    res.render("searchview", {
+      search: data.searchcriterion,
+      result: results,
+      cant: results.length,
+    });
+
+    return;
+  }
+  results = puttagObjects(results, "autor", searchcriterion, criteria);
+  res.render("searchview", {
+    search: data.searchcriterion,
+    result: results,
+    cant: results.length,
+  });
+
+  return;
 });
 router.get("/detail", async (req, res) => {
   //check database
@@ -35,8 +97,12 @@ router.get("/detail", async (req, res) => {
   obj["content"] = content;
   res.render("detail", obj);
 });
-router.get("/home", (req, res) => {
-  res.render("home", { content: "Testing WORKS" });
+router.get("/home", async (req, res) => {
+  let tesis = await TESIS.find({})
+    .limit(20)
+    .sort({ id: -1 })
+    .select("title autor photo coverpage md5");
+  res.render("home", { tesis: tesis });
 });
 router.get("/upload", (req, res) => {
   res.render("review", {});
@@ -44,27 +110,42 @@ router.get("/upload", (req, res) => {
 router.get("/review", (req, res) => {
   res.render("reviewtesis", {});
 });
+function checkIsDuplicate(array, cad) {
+  for (var i = 0; i < array.length; i++) {
+    if (array[i].content == cad) {
+      return false;
+    }
+  }
+  return true;
+}
 function search(namefile) {
   return new Promise((resolve, refuse) => {
     var RESULTS = {};
     pdf2html.pages(namefile, options, async (err, htmlPages) => {
+      var matchlines = 0;
       var datasplit = htmlPages;
       RESULTS["numberpages"] = datasplit.length;
       RESULTS["totalLinesLen"] = 0;
+      RESULTS["affectedpages"] = {};
+      RESULTS["affectedpages"]["pages"] = [];
       RESULTS["report"] = {};
       for (var i = 0; i < datasplit.length; i++) {
+        io.emit("msn", { msn: "Páginas procesadas " + i });
         var lines = datasplit[i]
           .replace(/\t/g, " ")
           .trim()
           .replace(/\n/g, "")
           .toLowerCase()
           .replace(/[\s]{2,}/g, " ")
-          .match(/[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/]{60,}(\.|\:)\s*/g);
+          .match(
+            /[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?“”\–\¡\!]{60,}?(\.|\:|\,|\n)\s*/g
+          );
         if (lines != null) {
           RESULTS["totalLinesLen"] += lines.length;
           for (var j = 0; j < lines.length; j++) {
             if (lines[j] != "") {
               try {
+                lines[j] = lines[j].replace(/\(/g, "\\(").replace(/\)/g, "\\)");
                 var linesdata = new RegExp(lines[j]);
                 var result = await PAGES.findOne({ content: linesdata });
                 if (result != null) {
@@ -74,6 +155,17 @@ function search(namefile) {
                       autor: result.autor,
                     };
                     RESULTS["report"][result.idTesis]["data"] = [];
+                  }
+                  if (
+                    checkIsDuplicate(
+                      RESULTS["affectedpages"].pages,
+                      datasplit[i].toLowerCase()
+                    )
+                  ) {
+                    RESULTS["affectedpages"].pages.push({
+                      content: datasplit[i].toLowerCase(),
+                      number: i + 1,
+                    });
                   }
                   RESULTS["report"][result.idTesis].data.push({
                     currentdoc: datasplit[i]
@@ -87,8 +179,15 @@ function search(namefile) {
                     linesmatch: linesdata.toString(),
                     currectdocpage: i,
                   });
+                  matchlines++;
+                  if (matchlines > 999) {
+                    resolve(RESULTS);
+                    return;
+                  }
                 }
-              } catch (error) {}
+              } catch (error) {
+                break;
+              }
             }
           }
         }
@@ -100,7 +199,6 @@ function search(namefile) {
 async function indexofData(results) {
   return new Promise(async (resolve, reject) => {
     //Union de paginas similares.
-
     var finalreport = {};
     finalreport["currentdoc"] = {};
     finalreport["comparativedocs"] = {};
@@ -127,9 +225,11 @@ async function indexofData(results) {
               regx,
               `<span id="resaltar">` + cad + `</span>`
             );
+            results[keys[i]]["md5"] = dbdata.md5;
             results[keys[i]].data[j]["originaltxt"] = {
               original: originalcontent,
               matchtext: formatDocument,
+              md5: dbdata.md5,
               page: parseInt(results[keys[i]].data[j].numberpage + 1),
             };
           } else {
@@ -153,11 +253,11 @@ router.post("/uploadreview", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ msn: "No existen archivos para subir" });
   }
+  io.emit("msn", { msn: "Comenzando revisión" });
   var data = req.files;
   var rootpath = __dirname.replace(/routes\/server/g, "");
   var begintoken = new Date();
   begintoken = md5(begintoken.toString()).substr(0, 5);
-
   var name =
     begintoken +
     "_" +
@@ -168,36 +268,101 @@ router.post("/uploadreview", (req, res) => {
       res.status(200).json({ msn: "ERROR: " + err });
       return;
     }
-
-    console.log("REVIEW ---------------------------___>");
-    var result = await search(completename);
-    await indexofData(result.report);
-
-    var keys = Object.keys(result.report);
-    if (keys.length == 0) {
-      res.status(200).json({ msn: "No se han encontrado coincidencias" });
-      return;
-    }
-    var renderdata = {
-      pagetotal: result.totalLinesLen,
-      numberpages: result.numberpages,
-      filename: data.file.name,
-      copy: [],
-    };
-    var reviewtotal = 0;
-
-    for (var i = 0; i < keys.length; i++) {
-      reviewtotal += result.report[keys[i]].data.length;
-      renderdata.copy.push(result.report[keys[i]]);
-    }
-    renderdata["reviewtotal"] = reviewtotal;
-    renderdata["graph"] = {
-      review: Number(reviewtotal / renderdata.pagetotal),
-      nonereview: Number(1 - reviewtotal / renderdata.pagetotal),
-    };
-    //console.log(renderdata.copy[0].data);
-
-    res.render("reviewreport", renderdata);
+    io.emit("msn", { msn: "Obteniendo Hash" });
+    md5File(completename).then(async (hash) => {
+     
+      var check = await REPORT.findOne({md5: hash});
+      if (check != null) {
+        //console.log(check.toJSON());
+        res.render("reviewreport", check.toJSON());
+        return;
+      }
+      io.emit("msn", { msn: "Iniciando Revisión" });
+      var result = await search(completename);
+      await indexofData(result.report);
+      io.emit("msn", { msn: "Revisión Culminada" });
+      var keys = Object.keys(result.report);
+      if (keys.length == 0) {
+        res.render("goodfile", {
+          filename: name,
+          msn:
+            "Felicidades no se han encontrado similitudes en la base de datos.",
+        });
+        //res.status(200).json({ msn: "No se han encontrado coincidencias" });
+        return;
+      }
+      var renderdata = {
+        pagetotal: result.totalLinesLen,
+        numberpages: result.numberpages,
+        filename: data.file.name,
+        affectedpages: {},
+        copy: [],
+      };
+      renderdata["md5"] = hash;
+      var reviewtotal = 0;
+      var modaltags = [
+        "resaltar2",
+        "resaltar3",
+        "resaltar4",
+        "resaltar5",
+        "resaltar6",
+      ];
+      var color = 0;
+      for (var i = 0; i < result.affectedpages.pages.length; i++) {
+        for (var j = 0; j < keys.length; j++) {
+          for (var k = 0; k < result.report[keys[j]].data.length; k++) {
+            result.report[keys[j]].data[k]["modal_id"] = `modal_${j}_${k}`;
+            var cad = result.report[keys[j]].data[k].linesmatch
+              .replace(/\//g, "")
+              .replace(/\s{2,}/g, " ");
+            var expresion = cad.replace(/\s/g, `(\\s|\n)+`);
+            var regx = new RegExp(expresion, "g");
+            if (result.affectedpages.pages[i].content.match(regx) != null) {
+              result.affectedpages.pages[
+                i
+              ].content = result.affectedpages.pages[i].content
+                .replace(/\//, "")
+                .replace(
+                  regx,
+                  `<span id="${
+                    modaltags[color % modaltags.length]
+                  }" data-target="#modal_${j}_${k}">` +
+                    cad +
+                    `</span>`
+                );
+              color++;
+            }
+          }
+        }
+      }
+      for (var i = 0; i < result.affectedpages.pages.length; i++) {
+        result.affectedpages.pages[i].content = result.affectedpages.pages[
+          i
+        ].content.replace(/<span>/g, "</span>");
+      }
+      for (var i = 0; i < keys.length; i++) {
+        reviewtotal += result.report[keys[i]].data.length;
+        renderdata.copy.push(result.report[keys[i]]);
+      }
+      renderdata["reviewtotal"] = reviewtotal;
+      renderdata.affectedpages = result.affectedpages;
+      renderdata["graph"] = {
+        review: Number(reviewtotal / renderdata.pagetotal),
+        nonereview: Number(1 - reviewtotal / renderdata.pagetotal),
+      };
+      for (var i = 0; i < renderdata.copy.length; i++) {
+        renderdata.copy[i]["porcentaje"] = Math.round(
+          (renderdata.copy[i].data.length / reviewtotal) * 100
+        );
+      }
+      var report = new REPORT(renderdata);
+      console.log(renderdata);
+      io.emit("msn", { msn: "Almacenando Reporte en la Base de Datos" });
+      report.save().then(() => {
+        io.emit("msn", { msn: "Terminado" });
+        res.render("reviewreport", renderdata);
+      });
+    });
   });
 });
 router.get("/listdatabase", (req, res) => {
@@ -227,13 +392,50 @@ router.get("/listdatabase", (req, res) => {
       res.render("listdatabase", { data: newdocs });
     });
 });
+router.post("/listdatabase", (req, res) => {
+  var body = req.body;
+  var filter = {};
+  var limit = 20;
+  //console.log(body);
+  if (body.modalidad != null && body.modalidad != "Todo.") {
+    filter["modalidad"] = body.modalidad;
+  }
+  if (body.unidad != null && body.unidad != "Todo.") {
+    filter["unidad"] = body.unidad;
+  }
+  if (body.search != null && body.search != "") {
+    filter["pages"] = new RegExp(body.search, "g");
+  }
+  var sort = { _id: -1 };
+  if (body.sort != null) {
+    var name = query.sort;
+    var key = name.split("_")[0];
+    var param = name.split("_")[1];
+    sort[key] = parseInt(param);
+  }
+  console.log(filter);
+  TESIS.find(filter)
+    .limit(30)
+    .sort(sort)
+    .limit(limit)
+    .exec((err, docs) => {
+      var c = 1;
+      var newdocs = docs.map((item) => {
+        item["number"] = c;
+        item["numpage"] = item.pages.length;
+        c++;
+        return item;
+      });
+      res.render("listdatabase", { data: newdocs, form: body });
+    });
+});
 router.post("/uploadphoto", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ msn: "No existen archivos para subir" });
   }
   var query = req.query;
   if (query.idTesis == null) {
-    res.status(200).json({ msn: "No podemos actualizar la photografia" });
+    res.status(200).json({ msn: "No podemos actualizar la fotografia" });
     return;
   }
   var data = req.files;
@@ -256,7 +458,7 @@ router.post("/uploadphoto", (req, res) => {
         },
       },
       (err, docs) => {
-        res.status(200).json({ msn: "Foto Actualizada con éxito!" });
+        res.status(200).json({ msn: "/server/photo/?name=" + name });
       }
     );
   });
@@ -272,11 +474,10 @@ router.get("/photo", (req, res) => {
   res.sendFile(path + query.name);
 });
 router.post("/upload", (req, res) => {
-  //console.log(req.files);
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ msn: "No existen archivos para subir" });
   }
-
+  io.emit("msn", { msn: "Archivo enviado al servidor con éxito!" });
   var data = req.files;
   var rootpath = __dirname.replace(/routes\/server/g, "");
   //res.status(200).json({msn: "LOAD!"});
@@ -295,6 +496,7 @@ router.post("/upload", (req, res) => {
         .json({ msn: "ERROR AL ESCRIBIR EL ARCHIVO EN EL SERVIDOR" });
     }
     const dataop = { page: 1, imageType: "png", width: 160, height: 226 };
+    io.emit("msn", { msn: "Parseando archivos" });
     pdf2html.thumbnail(completename, (err, thumbnailPath) => {
       if (err) {
         console.error("Conversion error: " + err);
@@ -339,6 +541,7 @@ router.post("/upload", (req, res) => {
           }
           md5File(completename).then(async (hash) => {
             var check = await TESIS.find({ md5: hash });
+            io.emit("msn", { msn: "Enviado a la base de datos" });
             if (check.length > 0) {
               res.json({ msn: "La tesis ya existe en la base de datos" });
               return;
@@ -360,7 +563,6 @@ router.post("/upload", (req, res) => {
               md5: hash,
             });
             tesis.save((err, docs) => {
-              console.log("Se guardo");
               var countcheck = 0;
               for (var i = 0; i < pagedata.length; i++) {
                 var page = new PAGES({
@@ -376,7 +578,7 @@ router.post("/upload", (req, res) => {
                 });
                 page.save(() => {
                   countcheck++;
-                  console.log("Paginas " + countcheck + " %");
+                  io.emit("msn", { msn: "Páginas parseadas " + countcheck });
                   if (countcheck == pagedata.length - 1) {
                     pagedata = pagedata.map((content, k) => {
                       var obj = {};
@@ -395,7 +597,6 @@ router.post("/upload", (req, res) => {
                       abstrac: abstrac,
                       content: pagedata,
                     };
-                    console.log(obj);
                     res.render("detail", obj);
                   }
                 });
@@ -418,17 +619,61 @@ router.get("/thumbail", (req, res) => {
   }
   var path = __dirname.replace(/routes\/server/g, "thumbail/");
 
-  console.log(__dirname);
   if (!fs.existsSync(path + params.name)) {
     res.status(404).json({ msn: "No existe ese archivo" });
   }
   res.sendFile(path + params.name);
 });
+router.get("/viewdoc/:id", async (req, res) => {
+  var params = req.params;
+  if (params.id == null) {
+    res.status(200).json({
+      msn: "Parametro necesario",
+    });
+    return;
+  }
+  var docs = await TESIS.find({ md5: params.id });
+  if (docs.length == 1) {
+    res.sendFile(docs[0].filepdf);
+    return;
+  }
+  res.status(200).json({ msn: "El archivo no se encuenta" });
+});
 router.post("/updatebook", async (req, res) => {
   var body = req.body;
-  console.log(body);
   var ok = await TESIS.update({ _id: body.id }, { $set: body });
+  await PAGES.update(
+    { idTesis: body.id },
+    { $set: { title: body.title, autor: body.autor } },
+    { multi: true }
+  );
   res.status(200).json({ msn: "GO MAN" });
+});
+router.get("/seereport", async (req, res) => {
+  var params = req.query;
+  if (params.id == null) {
+    res.status(300).json({msn: "Error es necesario un ID"});
+    return;
+  }
+  var report = await REPORT.findOne({_id: params.id});
+  console.log(report);
+  //res.status(200).json({});
+  res.render("reviewreport", report.toJSON());
+});
+router.get("/report",  (req, res) => {
+  var filter = {};
+  REPORT.find(filter).select("filename pagetotal numberpages graph md5").
+  sort({_id: -1}).
+  limit(20).exec((err, docs) => {
+    var count = 1;
+    var newdocs = docs.map((item) => {
+      var newitem = item.toJSON();
+      newitem["number"] = count;
+      count++;
+      return newitem;
+    });
+    res.render("generalreport", {results: newdocs});
+  });
 });
 
 module.exports = router;

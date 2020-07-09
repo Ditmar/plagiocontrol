@@ -5,7 +5,7 @@
       <img src="/server{{coverpage}}" alt="" width="300px">
       <br>
       <div class="card text-left">
-        <img class="card-img-top" src="{{photo}}" width="30px">
+        <img id="imgprofile" class="card-img-top" src="{{photo}}" width="30px">
         <div class="card-body">
           <h4 class="card-title">Autor</h4>
           <p class="card-text">{{autor}}</p>
@@ -126,14 +126,19 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary">Guardar Cambios</button>
+        <button type="button" id="sendbtn" class="btn btn-primary">Guardar Cambios</button>
       </div>
     </div>
   </div>
 </div>
 <script type="module">
   import { UploadUi } from "/js/uploadui.js";
-  var p = new UploadUi("/server/uploadphoto/?idTesis={{id}}");
+  var p = new UploadUi("/server/uploadphoto/?idTesis={{id}}", SOCKETDATA, (data) => {
+    var json = JSON.parse(data);
+    $('#uploaddata').modal('hide');
+    $("#imgprofile").attr("src", json.msn);
+    //$("#maincontent").html(data.msn);
+  });
   document.getElementById("modalidad").value = "{{modalidad}}";
   document.getElementById("unidad").value = "{{unidad}}";
   const formToJSON = elements => [].reduce.call(elements, (data, element) => {
@@ -156,7 +161,7 @@
       response => response.text()// if the response is a JSON object
     ).then(
       success => {
-        alert("Load")
+        alert("Datos Actualizados!")
       }
     )
     return false;

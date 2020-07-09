@@ -48,6 +48,6 @@ app.use(function(err, req, res, next) {
 });
 var port = 8000;
 app.listen(port, () => {
-  console.log("Corriendo " + port);
+  console.log("SOCKET ON " + port);
 });
 module.exports = app;

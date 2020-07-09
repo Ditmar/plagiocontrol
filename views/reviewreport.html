@@ -1,65 +1,103 @@
 <link rel="stylesheet" href="/stylesheets/style.css">
+<h2>
+    {{filename}}
+</h2>
 <div class="alert alert-secondary" role="alert">
-    Se  revisaron {{numberpages}} páginas.
-    y se han encontrado las siguientes coicidencias  
+    Se revisaron {{numberpages}} páginas.
+    y se han encontrado las siguientes coincidencias
 </div>
 <div>
     <h1>
         Reporte
     </h1>
     <span>
-        <b>{{reviewtotal}}</b> Oraciones que tienen coincidencia. 
+        <b>{{reviewtotal}}</b> Oraciones que tienen coincidencia.
 
     </span>
     <span>
-       de un total de <b>{{pagetotal}}  oraciones revisadas </b>
+        de un total de <b>{{pagetotal}} oraciones revisadas </b>
     </span>
     <canvas id="chart-0" style="display: block; height: 357px; width: 714px;">
     </canvas>
 </div>
-<table class="table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Coincidencias</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="container">
+    <div class="row">
+      <div class="col-8">
+        {{#affectedpages.pages}}
+        <span class="badge badge-primary">Página. {{number}}</span>
+        <div class="pages">
+            {{{content}}}
+        </div>
+        {{/affectedpages.pages}}
+      </div>
+      <div class="col-4">
+        <h2>Documentos que coinciden.</h2>
         {{#copy}}
-        <tr>
-            <td>
-                1
-            </td>
-            <td>
-                <table class="table table-striped table-inverse table-responsive">
-                    <thead class="thead-inverse">
-                        <tr>
-                            <th>Documento en revisión</th>
-                            <th>Documento Coincidencia encontrada</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            {{#data}}
-                            <tr>
-                                <td>{{{currentdoc}}} <span class="badge badge-secondary badge-pill">Página: {{currentpage}}</span></td>
-                                <td>{{{originaltxt.matchtext}}}
-                                    <span class="badge badge-secondary badge-pill">Página: {{originaltxt.page}}</span></td>
-                                </td> 
-                            </tr>
-                            {{/data}}
-                        </tbody>
-                </table>
-            </td>
-        </tr>
+        <div class="pages">
+            <b>
+                Titulo :
+            </b>
+            {{title}}
+            <br />
+            <b>
+                Autor :
+            </b>
+            {{autor}}
+            <br>
+            <b>
+                Porcentaje de copia 
+            </b>
+            {{porcentaje}} %
+            <br>
+            <a name="" id="" class="btn btn-primary" target="_blank" href="/server/viewdoc/{{md5}}" role="button">Ver trabajo
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-book-half" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z"/>
+                    <path fill-rule="evenodd" d="M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869z"/>
+                  </svg>
+            </a>
+        </div>
         {{/copy}}
-    </tbody>
-</table>
+      </div>
+    </div>
+  </div>
+{{#copy}}
+{{#data}}
+<div class="modal fade" id="{{modal_id}}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Página {{{originaltxt.page}}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{{originaltxt.matchtext}}}
+            </div>
+            <div class="modal-footer">
+                Titulo: {{title}} <br>
+                Autor: {{autor}} <br>
+                <a name="" id="" target="_blank" class="btn btn-primary" href="/server/viewdoc/{{originaltxt.md5}}#page={{{originaltxt.page}}}" role="button">Ver Trabajo Original en la misma página</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{/data}}
+{{/copy}}
 <script>
-    var data = {datasets: [{data: [`{{graph.review}}`, `{{graph.nonereview}}`], backgroundColor: ['rgba(255, 99, 132, 0.5)','rgba(54, 162, 235, 0.5)'],}]};
-	var options = {legend: false, tooltips: false};
-    var chart = new Chart('chart-0', { 
-        type: 'pie', 
-        data: data, 
-        options: options});
+    var data = { datasets: [{ data: [`{{graph.review}}`, `{{graph.nonereview}}`], backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'], }] };
+    var options = { legend: false, tooltips: false };
+    var chart = new Chart('chart-0', {
+        type: 'pie',
+        data: data,
+        options: options
+    });
     chart.update();
+    var spanbtn = document.getElementsByTagName("span");
+    for (var i = 0; i < spanbtn.length; i++) {
+        spanbtn[i].addEventListener("click", function () {
+            console.log(this.getAttribute("data-target"));
+            $(this.getAttribute("data-target")).modal();
+        });
+    }
 </script>

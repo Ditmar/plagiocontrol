@@ -2,8 +2,25 @@ class ApiClient {
   constructor() {
     this.mainmenu = document.querySelectorAll("a");
     this.contenthtml = document.getElementById("maincontent");
+    this.serchbtn = document.getElementById("buscar");
+    this.criteria = document.getElementById("criteria");
     this.root = "HOLA AMIGOS";
     this.renderPage();
+    this.serchbtn.addEventListener("click", (e) => {
+      fetch("/server/search", {
+        method: "POST",
+        body: JSON.stringify({"searchcriterion": this.criteria.value}),
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'}
+      })
+        .then((response, data) => {
+          return response.text();
+        })
+        .then((data) => {
+            $("#maincontent").html(data);
+        });
+    });
     this.mainmenu.forEach((item, i) => {
       item.addEventListener("click", (e) => {
         e.preventDefault();
@@ -35,6 +52,7 @@ class ApiClient {
     var uri = document.location.href;
     var check = uri.match(/\#\/.+/g);
     var url = "/";
+    //document.getElementById("myNav").style.width = "100%";
     if (check) {
       var ur = check[0].replace(/\#/, "");
       url = "/server" + ur;
@@ -47,8 +65,6 @@ class ApiClient {
           return response.text();
         })
         .then((data) => {
-            //this.contenthtml.innerHTML = data;
-            //this.insertAndExecute("maincontent", data);
             $("#maincontent").html(data);
         });
     }

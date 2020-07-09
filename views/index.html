@@ -13,6 +13,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://getbootstrap.com/docs/4.0/examples/dashboard/dashboard.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
     
     
     <!-- Custom styles for this template -->
@@ -20,9 +21,19 @@
   </head>
 
   <body>
+    <div id="myNav" class="overlay">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <div class="overlay-content">
+        <div class="loader">Loading...</div>
+        <div class="msn" id="msn_msn">
+          Procesando los datos porfavor espere
+        </div>
+      </div>
+    </div>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
       <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">POLICE</a>
-      <input class="form-control form-control-dark w-100" type="text" placeholder="Buscar" aria-label="Search">
+      <input id="criteria" class="form-control form-control-dark w-100" type="text" placeholder="Criterio de Busqueda" aria-label="Search">
+      <button id="buscar" type="button" class="btn btn-dark">Buscar</button>
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
             
@@ -116,6 +127,7 @@
         </main>
       </div>
     </div>
+    
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -129,5 +141,19 @@
     <!-- Graphs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <script type="module" src="/js/client.js"></script>
+    <script src="/js/socket.io.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.canvaswrapper.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.colorhelpers.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.saturated.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.browser.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.drawSeries.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.uiConstants.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.legend.js"></script>
+    <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.pie.js"></script>
+    <script>
+      console.log("IN HERE");
+      SOCKETDATA = io("http://localhost:3000");
+    </script>
   </body>
 </html>

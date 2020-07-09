@@ -1,0 +1,68 @@
+<h2>
+    REPORTES
+</h2>
+<div class="container">
+    <table class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Archivo</th>
+                <th scope="col">Paginas Revisadas</th>
+                <th scope="col">Gráfico</th>
+                <th scope="col">Ver Reporte</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#results}}
+            <tr>
+                <td>
+                    {{number}}
+                </td>
+                <td>{{filename}}</td>
+                <td>{{numberpages}}</td>
+                <td>
+                    <div id="chart-{{number}}" class="graphs">
+                    </div>
+                </td>
+                <td>
+                    <a name="" id="see_report" id_info="{{_id}}" class="btn btn-primary" href="#" role="button">Ver <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-bar-chart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="4" height="5" x="1" y="10" rx="1"/>
+                        <rect width="4" height="9" x="6" y="6" rx="1"/>
+                        <rect width="4" height="14" x="11" y="1" rx="1"/>
+                      </svg></a>
+                </td>
+            </tr>
+            <script>
+                var data = [
+                    { label: "Similitud", data: [[1, "{{graph.review}}"]] },
+                    { label: "Original", data: [[1, "{{graph.nonereview}}"]] }
+                ];
+                $.plot('#chart-{{number}}', data, {
+                    series: {
+                        pie: {
+                            show: true
+                        }
+                    }
+                });
+            </script>
+            {{/results}}
+        </tbody>
+    </table>
+</div>
+<script>
+    $("td a").each( (item, data) => {
+        $(data).click(e => {
+            e.preventDefault();
+            
+            fetch("/server/seereport/?id=" + $(data).attr("id_info"), 
+            {method: "GET"})
+            .then((response, data) => {
+                return response.text();
+            })
+            .then((data) => {
+                $("#maincontent").html(data);
+            });
+        });
+    });
+
+</script>
