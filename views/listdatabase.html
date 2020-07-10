@@ -19,7 +19,8 @@
         </select>
       </div>
       <div class="col-sm">
-        <input type="text" class="form-control" id="search" name="search" aria-describedby="emailHelp" placeholder="Buscar">
+        <input type="text" class="form-control" id="search" name="search" aria-describedby="emailHelp"
+          placeholder="Buscar">
       </div>
       <div class="col-sm">
         <button type="submit" class="btn btn-primary">Listar</button>
@@ -66,23 +67,23 @@
               <p class="card-text">{{autor}}</p>
             </div>
           </div>
-  
+
         </td>
         <td>{{modalidad}}</td>
         <td>{{unidad}}</td>
         <td>{{numpage}}</td>
         <td>
-          <a href="/#/detail/?id={{_id}}">Editar</a>
+          <a href="/#/detail/?id={{_id}}" class="editarBtn" hola="prueba">Editar</a>
         </td>
         <td>
           <a href="/server/viewdoc/{{md5}}" target="_blank">
             <svg class="bi bi-arrow-down-circle-fill" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd"
-              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 5a.5.5 0 0 0-1 0v4.793L5.354 7.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.793V5z" />
-          </svg>
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 5a.5.5 0 0 0-1 0v4.793L5.354 7.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 9.793V5z" />
+            </svg>
           </a>
-          
+
         </td>
       </tr>
       {{/data}}
@@ -91,6 +92,31 @@
 </div>
 
 <script>
+  $(".editarBtn").each(function () {
+    //console.log("EDITAR ");
+    $(this).on("click", function (e) {
+      e.preventDefault();
+      document.getElementById("myNav").style.width = "100%";
+      
+      $("#msn_msn").html("Accediendo al documento, espere por favor");
+      var url = $(this).attr("href");
+      url = url.replace(/\/\#/g, "/server");
+      setTimeout(function () {
+        fetch(url, {
+          method: "GET"
+        }).then(
+          response => response.text()
+        ).then(
+          success => {
+            document.getElementById("myNav").style.width = "0%";
+            $("#maincontent").html(success);
+          }
+        );
+      }, 1000);
+
+      //console.log($(this).attr("href"));
+    });
+  })
   if ("{{form.modalidad}}" != "") {
     document.getElementById("modalidad").value = "{{form.modalidad}}";
   }
@@ -124,9 +150,7 @@
       response => response.text()// if the response is a JSON object
     ).then(
       success => {
-        
         $("#maincontent").html(success);
-        
       }
     );
   });

@@ -270,3 +270,11 @@ box-shadow: 0px 0px 46px -16px rgba(0,0,0,0.75);
   width: 150px;
   height: 150px;
 }
+.graphsbig {
+  width: 350px;
+  height: 350px;
+  text-align: center;
+}
+h2 {
+  color: #007BFF;
+}

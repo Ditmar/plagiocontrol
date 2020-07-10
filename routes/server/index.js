@@ -24,6 +24,7 @@ const options = { text: true };
 var router = express.Router();
 var TESIS = require("../../database/tesis");
 var PAGES = require("../../database/page");
+const PAGE = require("../../database/page");
 /* GET home page. */
 router.use(fileUpload());
 function puttagObjects(objs, key, expresion, cad) {
@@ -34,7 +35,6 @@ function puttagObjects(objs, key, expresion, cad) {
   return newobjs;
 }
 router.post("/search", async (req, res) => {
-  console.log("--------->");
   var data = req.body;
   console.log(data);
   if (data.searchcriterion == null) {
@@ -79,7 +79,7 @@ router.post("/search", async (req, res) => {
   return;
 });
 router.get("/detail", async (req, res) => {
-  //check database
+  //check database  
   var params = req.query;
   if (params.id == null) {
     let msn = { msn: "Error al ingresar a la vista" };
@@ -123,6 +123,10 @@ function search(namefile) {
     var RESULTS = {};
     pdf2html.pages(namefile, options, async (err, htmlPages) => {
       var matchlines = 0;
+      if (htmlPages == null) {
+        resolve(false);
+        return;
+      }
       var datasplit = htmlPages;
       RESULTS["numberpages"] = datasplit.length;
       RESULTS["totalLinesLen"] = 0;
@@ -134,11 +138,13 @@ function search(namefile) {
         var lines = datasplit[i]
           .replace(/\t/g, " ")
           .trim()
-          .replace(/\n/g, "")
           .toLowerCase()
+          .replace(/\n/g, " ")
+          .replace(/ /g, " ")
           .replace(/[\s]{2,}/g, " ")
           .match(
-            /[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?“”\–\¡\!]{60,}?(\.|\:|\,|\n)\s*/g
+            ///[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?“”\–\¡\!]{60,}?(\.|\:|\,|\n)\s*/g
+            /[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?\“\”\–\¡\!\●]{60,}?(\.|\:|\,|\n)\s*/g
           );
         if (lines != null) {
           RESULTS["totalLinesLen"] += lines.length;
@@ -212,33 +218,43 @@ async function indexofData(results) {
             dbdata.pages[parseInt(results[keys[i]].data[j].numberpage)];
           var formatContent = originalcontent;
           formatContent = formatContent.toLowerCase().replace(/\//, "");
-          var cad = results[keys[i]].data[j].linesmatch
-            .replace(/\//g, "")
+          var cad = results[keys[i]].data[j].linesmatch.substring(1, results[keys[i]].data[j].linesmatch.length - 1);
+          var cad = cad
             .replace(/\s{2,}/g, " ");
-          var expresion = cad.replace(/\s/g, `(\\s|\n)+`);
-          var regx = new RegExp(expresion, "g");
-          var matchdata = formatContent.match(regx);
-          if (matchdata != null) {
-            var init = regx.exec(formatContent).index;
-            var final = matchdata[0].length;
-            var formatDocument = formatContent.replace(
-              regx,
-              `<span id="resaltar">` + cad + `</span>`
-            );
-            results[keys[i]]["md5"] = dbdata.md5;
-            results[keys[i]].data[j]["originaltxt"] = {
-              original: originalcontent,
-              matchtext: formatDocument,
-              md5: dbdata.md5,
-              page: parseInt(results[keys[i]].data[j].numberpage + 1),
-            };
-          } else {
-            results[keys[i]].data[j]["originaltxt"] = {
-              original: originalcontent,
-              matchtext: originalcontent,
-              page: parseInt(results[keys[i]].data[j].numberpage + 1),
-            };
+          var expresion = cad.replace(/\s/g, `(\\s|\\n)+`);
+          /*if (expresion.match(/eliasymunozabogados/g) != null) {
+            console.log(cad);
+            console.log(expresion);
+            return;
+          }*/
+          try {
+            var regx = new RegExp(expresion, "g");
+            var matchdata = formatContent.match(regx);
+            if (matchdata != null) {
+              var init = regx.exec(formatContent).index;
+              var final = matchdata[0].length;
+              var formatDocument = formatContent.replace(
+                regx,
+                `<span id="resaltar">` + cad + `</span>`
+              );
+              results[keys[i]]["md5"] = dbdata.md5;
+              results[keys[i]].data[j]["originaltxt"] = {
+                original: originalcontent,
+                matchtext: formatDocument,
+                md5: dbdata.md5,
+                page: parseInt(results[keys[i]].data[j].numberpage + 1),
+              };
+            } else {
+              results[keys[i]].data[j]["originaltxt"] = {
+                original: originalcontent,
+                matchtext: originalcontent,
+                page: parseInt(results[keys[i]].data[j].numberpage + 1),
+              };
+            }
+          }catch (e) {
+            console.log(regx)
           }
+          
         }
       }
     }
@@ -279,10 +295,16 @@ router.post("/uploadreview", (req, res) => {
       }
       io.emit("msn", { msn: "Iniciando Revisión" });
       var result = await search(completename);
+      if (result == false) {
+        res.render("error", {msn: "No se ha podido procesar el documento, puede que sea demasiado grande o este protegido"});
+        return;
+      }
       await indexofData(result.report);
       io.emit("msn", { msn: "Revisión Culminada" });
       var keys = Object.keys(result.report);
+      console.log("Pasa el Object key");
       if (keys.length == 0) {
+        io.emit("msn", { msn: "Cerrando" });
         res.render("goodfile", {
           filename: name,
           msn:
@@ -291,6 +313,7 @@ router.post("/uploadreview", (req, res) => {
         //res.status(200).json({ msn: "No se han encontrado coincidencias" });
         return;
       }
+      console.log("ENTRA");
       var renderdata = {
         pagetotal: result.totalLinesLen,
         numberpages: result.numberpages,
@@ -298,6 +321,7 @@ router.post("/uploadreview", (req, res) => {
         affectedpages: {},
         copy: [],
       };
+      io.emit("msn", { msn: "Resaltando colores" });
       renderdata["md5"] = hash;
       var reviewtotal = 0;
       var modaltags = [
@@ -308,12 +332,14 @@ router.post("/uploadreview", (req, res) => {
         "resaltar6",
       ];
       var color = 0;
+      
       for (var i = 0; i < result.affectedpages.pages.length; i++) {
         for (var j = 0; j < keys.length; j++) {
           for (var k = 0; k < result.report[keys[j]].data.length; k++) {
+            console.log("Entra a los datos " + i +"," + j +","+ k + " <-");
             result.report[keys[j]].data[k]["modal_id"] = `modal_${j}_${k}`;
-            var cad = result.report[keys[j]].data[k].linesmatch
-              .replace(/\//g, "")
+            var cad = result.report[keys[j]].data[k].linesmatch.substring(1, result.report[keys[j]].data[k].linesmatch.length - 1);
+            var cad = cad
               .replace(/\s{2,}/g, " ");
             var expresion = cad.replace(/\s/g, `(\\s|\n)+`);
             var regx = new RegExp(expresion, "g");
@@ -335,6 +361,7 @@ router.post("/uploadreview", (req, res) => {
           }
         }
       }
+      console.log("SIGE EL REPORTE");
       for (var i = 0; i < result.affectedpages.pages.length; i++) {
         result.affectedpages.pages[i].content = result.affectedpages.pages[
           i
@@ -507,6 +534,10 @@ router.post("/upload", (req, res) => {
         //let dataBuffer = fs.readFileSync("/opt/app/pdffiles/vue2.pdf");
         pdf2html.pages(completename, options, (err, htmlPages) => {
           var pagedata = [];
+          if (htmlPages == null) {
+            res.render("error", {msn: "No se ha podido procesar el documento, puede que sea demasiado grande o este protegido"})
+            return;
+          }
           for (var i = 0; i < htmlPages.length; i++) {
             var pagehtml = htmlPages[i].replace(/\t/g, " ");
             pagedata.push(pagehtml.trim());
@@ -674,6 +705,22 @@ router.get("/report",  (req, res) => {
     });
     res.render("generalreport", {results: newdocs});
   });
+});
+router.post("/deletedocs/:id", async(req, res) => {
+  console.log(req.params);
+  if (req.params == null) {
+    res.status(300).json({msn: "Error es necesario un parámetro para proceder la acción"})
+    return;
+  }
+  var resulttesis = await TESIS.remove({_id: req.params.id});
+  var resultpages = await PAGE.remove({idTesis: req.params.id});
+  console.log(resulttesis);
+  console.log(resultpages);
+  var sum = Number(resulttesis.deletedCount + resultpages.deletedCount);
+  res.render("deletedoc", {sum: sum});
+});
+router.get("/inicio", (req, res) => {
+  res.render("inicio");
 });
 
 module.exports = router;

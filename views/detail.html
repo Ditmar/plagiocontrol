@@ -78,7 +78,20 @@
 
           <small id="helpId" class="form-text text-muted"></small>
         </div>
-        <button type="submit" id="updateinfo" class="btn btn-primary">Actualizar Información</button>
+        <button type="submit" id="updateinfo" class="btn btn-primary">Actualizar Información<svg width="1em"
+            height="1em" viewBox="0 0 16 16" class="bi bi-subtract" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2z" />
+          </svg></button>
+        <a name="" id="deleteClick" class="btn btn-danger" href="#" role="button">Borrar Documento<svg width="1em"
+            height="1em" viewBox="0 0 16 16" class="bi bi-trash2-fill" fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M2.037 3.225l1.684 10.104A2 2 0 0 0 5.694 15h4.612a2 2 0 0 0 1.973-1.671l1.684-10.104C13.627 4.224 11.085 5 8 5c-3.086 0-5.627-.776-5.963-1.775z" />
+            <path fill-rule="evenodd"
+              d="M12.9 3c-.18-.14-.497-.307-.974-.466C10.967 2.214 9.58 2 8 2s-2.968.215-3.926.534c-.477.16-.795.327-.975.466.18.14.498.307.975.466C5.032 3.786 6.42 4 8 4s2.967-.215 3.926-.534c.477-.16.795-.327.975-.466zM8 5c3.314 0 6-.895 6-2s-2.686-2-6-2-6 .895-6 2 2.686 2 6 2z" />
+          </svg></a>
       </form>
 
     </div>
@@ -104,6 +117,33 @@
     {{/content}}
   </tbody>
 </table>
+<div class="modal fade" id="alertboxdelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Desea borrar el documento</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" role="alert">
+          <h4 class="alert-heading">Peligro!</h4>
+          <p>Esta seguro que desea borrar el documento</p>
+          <p>Comprenda que una vez borrado ya no se podrán usar los parrafos del mismo para otras revisiones.</p>
+          <p><b>{{title}}</b></p>
+          <p>{{id}}</p>
+          <p class="mb-0"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" id="senddelete" class="btn btn-danger">Proceder</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="uploaddata" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
   aria-hidden="true">
@@ -133,6 +173,28 @@
 </div>
 <script type="module">
   import { UploadUi } from "/js/uploadui.js";
+  $("#senddelete").on('click', (e) => {
+    e.preventDefault();
+    $("#alertboxdelete").modal('hide');
+    document.getElementById("myNav").style.width = "100%";
+    setTimeout(function(){  
+      fetch("/server/deletedocs/{{id}}", {
+      method: "POST"
+    }).then(
+      response => response.text()// if the response is a JSON object
+    ).then(
+      success => {
+         $("#maincontent").html(success);
+         document.getElementById("myNav").style.width = "0%";
+      }
+    );
+    }, 2000);
+    /**/
+  })
+  $("#deleteClick").on("click", (e) => {
+    e.preventDefault();
+    $("#alertboxdelete").modal('show');
+  })
   var p = new UploadUi("/server/uploadphoto/?idTesis={{id}}", SOCKETDATA, (data) => {
     var json = JSON.parse(data);
     $('#uploaddata').modal('hide');
@@ -153,9 +215,9 @@
     fetch("/server/updatebook", {
       method: "POST",
       headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(data)
     }).then(
       response => response.text()// if the response is a JSON object

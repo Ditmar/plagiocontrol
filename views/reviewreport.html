@@ -1,15 +1,16 @@
 <link rel="stylesheet" href="/stylesheets/style.css">
-<h2>
-    {{filename}}
-</h2>
+<h1>
+    Reporte
+</h1>
 <div class="alert alert-secondary" role="alert">
     Se revisaron {{numberpages}} páginas.
     y se han encontrado las siguientes coincidencias
 </div>
 <div>
-    <h1>
-        Reporte
-    </h1>
+    <h2>
+        
+        {{filename}}
+    </h2>
     <span>
         <b>{{reviewtotal}}</b> Oraciones que tienen coincidencia.
 
@@ -17,8 +18,7 @@
     <span>
         de un total de <b>{{pagetotal}} oraciones revisadas </b>
     </span>
-    <canvas id="chart-0" style="display: block; height: 357px; width: 714px;">
-    </canvas>
+    
 </div>
 <div class="container">
     <div class="row">
@@ -31,6 +31,11 @@
         {{/affectedpages.pages}}
       </div>
       <div class="col-4">
+        <h2>Grafica de Similitudes</h2>
+          <div class="pages">
+            <div id="chart-0" class="graphsbig">
+            </div>
+          </div>
         <h2>Documentos que coinciden.</h2>
         {{#copy}}
         <div class="pages">
@@ -85,14 +90,17 @@
 {{/data}}
 {{/copy}}
 <script>
-    var data = { datasets: [{ data: [`{{graph.review}}`, `{{graph.nonereview}}`], backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)'], }] };
-    var options = { legend: false, tooltips: false };
-    var chart = new Chart('chart-0', {
-        type: 'pie',
-        data: data,
-        options: options
-    });
-    chart.update();
+    var data = [
+                    { label: "Similitud", data: [[1, "{{graph.review}}"]] },
+                    { label: "Original", data: [[1, "{{graph.nonereview}}"]] }
+                ];
+                $.plot('#chart-0', data, {
+                    series: {
+                        pie: {
+                            show: true
+                        }
+                    }
+                });
     var spanbtn = document.getElementsByTagName("span");
     for (var i = 0; i < spanbtn.length; i++) {
         spanbtn[i].addEventListener("click", function () {

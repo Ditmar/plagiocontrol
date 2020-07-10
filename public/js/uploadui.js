@@ -41,6 +41,7 @@ class UploadUi {
         this.dropzone.ondrop = (e) => {
             e.preventDefault();
             this.dropzone.className = 'upload-drop-zone';
+            
             this.startUpload(e.dataTransfer.files)
         }
     
@@ -56,6 +57,7 @@ class UploadUi {
     }
     startUpload(files) {
         //document.getElementById("myNav").style.width = "100%";
+        console.log("ENTER HERE " + files.length);
         if (files.length > 0) {
             var name = files[0].name
             var type = files[0].type;
