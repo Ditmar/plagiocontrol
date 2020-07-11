@@ -43,14 +43,16 @@ router.post("/search", async (req, res) => {
     });
     return;
   }
-  var criteria = data.searchcriterion;
+  var criteria = data.searchcriterion.toUpperCase();
   //search by name
-  var searchcriterion = new RegExp(data.searchcriterion, "g");
+  var searchcriterion = new RegExp(data.searchcriterion.toUpperCase(), "g");
 
   var results = await TESIS.find({ autor: searchcriterion });
   if (results.length == 0) {
     var results = await TESIS.find({ title: searchcriterion });
     if (results.length == 0) {
+      var searchcriterion = new RegExp(data.searchcriterion.toLowerCase(), "g");
+
       var results = await TESIS.find({ abstract: searchcriterion });
       results = puttagObjects(results, "abstract", searchcriterion, criteria);
       res.render("searchview", {
@@ -480,12 +482,12 @@ router.post("/uploadphoto", (req, res) => {
       { _id: query.idTesis },
       {
         $set: {
-          photo: "/server/photo/?name=" + name,
+          photo: "/server/photo/?name=" + name.toUpperCase(),
           pathphoto: completename,
         },
       },
       (err, docs) => {
-        res.status(200).json({ msn: "/server/photo/?name=" + name });
+        res.status(200).json({ msn: "/server/photo/?name=" + name.toUpperCase() });
       }
     );
   });
@@ -498,6 +500,7 @@ router.get("/photo", (req, res) => {
   }
   ///Users/Ditmar/sistema/police/pdffiles/CBD93_FINAL_ANTECEDENTES_JULIO.PDF
   var path = __dirname.replace(/routes\/server/g, "photo/");
+  console.log("La ruta es " + path);
   res.sendFile(path + query.name);
 });
 router.post("/upload", (req, res) => {
