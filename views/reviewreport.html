@@ -8,7 +8,7 @@
 </div>
 <div>
     <h2>
-        
+
         {{filename}}
     </h2>
     <span>
@@ -18,53 +18,68 @@
     <span>
         de un total de <b>{{pagetotal}} oraciones revisadas </b>
     </span>
-    
+
 </div>
 <div class="container">
     <div class="row">
-      <div class="col-sm-8">
-        {{#affectedpages.pages}}
-        <span class="badge badge-primary">Página. {{number}}</span>
-        <div class="pages">
-            {{{content}}}
-        </div>
-        {{/affectedpages.pages}}
-      </div>
-      <div class="col-sm-4">
-        <h2>Grafica de Similitudes</h2>
-          <div class="pages">
-            <div id="chart-0" class="graphsbig">
+        <div class="col-sm-8">
+            {{#affectedpages.pages}}
+            <span class="badge badge-primary">Página. {{number}}</span>
+            <div class="pages">
+                {{{content}}}
             </div>
-          </div>
-        <h2>Documentos que coinciden.</h2>
-        {{#copy}}
-        <div class="pages">
-            <b>
-                Titulo :
-            </b>
-            {{title}}
-            <br />
-            <b>
-                Autor :
-            </b>
-            {{autor}}
-            <br>
-            <b>
-                Porcentaje de copia 
-            </b>
-            {{porcentaje}} %
-            <br>
-            <a name="" id="" class="btn btn-primary" target="_blank" href="/server/viewdoc/{{md5}}" role="button">Ver trabajo
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-book-half" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z"/>
-                    <path fill-rule="evenodd" d="M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869z"/>
-                  </svg>
-            </a>
+            {{/affectedpages.pages}}
         </div>
-        {{/copy}}
-      </div>
+        <div class="col-sm-4">
+            <h2>Grafica de Similitudes.</h2>
+            <div class="pages">
+                <div id="chart-0" class="graphsbig">
+                </div>
+            </div>
+            <h2>Relación de documentos.</h2>
+            <div class="pages">
+                <div id="chart-1" class="graphsbig">
+                </div>
+            </div>
+            <h2>Documentos que coinciden.</h2>
+            {{#copy}}
+            <div class="pages">
+                <span id="{{style}}_line">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-check-square-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm10.03 4.97a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                      </svg>
+                </span>
+                <b>
+                    Titulo :
+                </b>
+                {{title}}
+                <br />
+                <b>
+                    Autor :
+                </b>
+                {{autor}}
+                <br>
+                <b>
+                    Porcentaje de copia
+                </b>
+                <span id="{{style}}_line">{{porcentaje}} %</span>
+                
+                <br>
+                <a name="" id="" class="btn btn-primary" target="_blank" href="/server/viewdoc/{{md5}}"
+                    role="button">Ver trabajo
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-book-half" fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                            d="M12.786 1.072C11.188.752 9.084.71 7.646 2.146A.5.5 0 0 0 7.5 2.5v11a.5.5 0 0 0 .854.354c.843-.844 2.115-1.059 3.47-.92 1.344.14 2.66.617 3.452 1.013A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.276-.447L15.5 2.5l.224-.447-.002-.001-.004-.002-.013-.006-.047-.023a12.582 12.582 0 0 0-.799-.34 12.96 12.96 0 0 0-2.073-.609zM15 2.82v9.908c-.846-.343-1.944-.672-3.074-.788-1.143-.118-2.387-.023-3.426.56V2.718c1.063-.929 2.631-.956 4.09-.664A11.956 11.956 0 0 1 15 2.82z" />
+                        <path fill-rule="evenodd"
+                            d="M3.214 1.072C4.813.752 6.916.71 8.354 2.146A.5.5 0 0 1 8.5 2.5v11a.5.5 0 0 1-.854.354c-.843-.844-2.115-1.059-3.47-.92-1.344.14-2.66.617-3.452 1.013A.5.5 0 0 1 0 13.5v-11a.5.5 0 0 1 .276-.447L.5 2.5l-.224-.447.002-.001.004-.002.013-.006a5.017 5.017 0 0 1 .22-.103 12.958 12.958 0 0 1 2.7-.869z" />
+                    </svg>
+                </a>
+            </div>
+            {{/copy}}
+        </div>
     </div>
-  </div>
+</div>
 {{#copy}}
 {{#data}}
 <div class="modal fade" id="{{modal_id}}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
@@ -82,25 +97,42 @@
             <div class="modal-footer">
                 Titulo: {{title}} <br>
                 Autor: {{autor}} <br>
-                <a name="" id="" target="_blank" class="btn btn-primary" href="/server/viewdoc/{{originaltxt.md5}}#page={{{originaltxt.page}}}" role="button">Ver Trabajo Original en la misma página</a>
+                <a name="" id="" target="_blank" class="btn btn-primary"
+                    href="/server/viewdoc/{{originaltxt.md5}}#page={{{originaltxt.page}}}" role="button">Ver Trabajo
+                    Original en la misma página</a>
             </div>
         </div>
     </div>
 </div>
 {{/data}}
 {{/copy}}
+{{#copy}}
+<input type="hidden" class="data_bars" value="{{porcentaje}}" id="">
+{{/copy}}
 <script>
     var data = [
-                    { label: "Similitud", data: [[1, "{{graph.review}}"]] },
-                    { label: "Original", data: [[1, "{{graph.nonereview}}"]] }
-                ];
-                $.plot('#chart-0', data, {
-                    series: {
-                        pie: {
-                            show: true
-                        }
-                    }
-                });
+        { label: "Similitud", data: [[1, "{{graph.review}}"]] },
+        { label: "Original", data: [[1, "{{graph.nonereview}}"]] }
+    ];
+    var dataBars = []
+    var colors = ["cyan", "red", "#2db928", "yellow", "yellowgreen", "black", "#ffc168", "#8e43e7", "#b84592"]
+    $(".data_bars").each((i, item) => {
+        label: "ss",
+        dataBars.push({color: colors[i], 
+        data: [[i, Number($(item).val())]],
+        bars: {
+            show: true
+        }
+        });
+    });
+    $.plot('#chart-0', data, {
+        series: {
+            pie: {
+                show: true
+            }
+        }
+    });
+    $.plot('#chart-1', dataBars);
     var spanbtn = document.getElementsByTagName("span");
     for (var i = 0; i < spanbtn.length; i++) {
         spanbtn[i].addEventListener("click", function () {

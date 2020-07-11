@@ -135,6 +135,25 @@ function search(namefile) {
       RESULTS["affectedpages"] = {};
       RESULTS["affectedpages"]["pages"] = [];
       RESULTS["report"] = {};
+      var modaltags = [
+        "resaltar2",
+        "resaltar3",
+        "resaltar4",
+        "resaltar5",
+        "resaltar6",
+        "resaltar7",
+        "resaltar8",
+        "resaltar9",
+        "resaltar10",
+        "resaltar11",
+        "resaltar12",
+        "resaltar13",
+        "resaltar14",
+        "resaltar15",
+        "resaltar16",
+        "resaltar17"
+      ];
+      var tagcolor = 0;
       for (var i = 0; i < datasplit.length; i++) {
         io.emit("msn", { msn: "Páginas procesadas " + i });
         var lines = datasplit[i]
@@ -161,7 +180,9 @@ function search(namefile) {
                     RESULTS["report"][result.idTesis] = {
                       title: result.title,
                       autor: result.autor,
+                      style: modaltags[tagcolor % modaltags.length]
                     };
+                    tagcolor++;
                     RESULTS["report"][result.idTesis]["data"] = [];
                   }
                   if (
@@ -211,6 +232,7 @@ async function indexofData(results) {
     finalreport["currentdoc"] = {};
     finalreport["comparativedocs"] = {};
     var keys = Object.keys(results);
+    
     for (var i = 0; i < keys.length; i++) {
       var docs = await TESIS.findOne({ _id: keys[i] });
       if (docs != null) {
@@ -224,11 +246,6 @@ async function indexofData(results) {
           var cad = cad
             .replace(/\s{2,}/g, " ");
           var expresion = cad.replace(/\s/g, `(\\s|\\n)+`);
-          /*if (expresion.match(/eliasymunozabogados/g) != null) {
-            console.log(cad);
-            console.log(expresion);
-            return;
-          }*/
           try {
             var regx = new RegExp(expresion, "g");
             var matchdata = formatContent.match(regx);
@@ -353,7 +370,7 @@ router.post("/uploadreview", (req, res) => {
                 .replace(
                   regx,
                   `<span id="${
-                    modaltags[color % modaltags.length]
+                    result.report[keys[j]]["style"]
                   }" data-target="#modal_${j}_${k}">` +
                     cad +
                     `</span>`
@@ -363,7 +380,6 @@ router.post("/uploadreview", (req, res) => {
           }
         }
       }
-      console.log("SIGE EL REPORTE");
       for (var i = 0; i < result.affectedpages.pages.length; i++) {
         result.affectedpages.pages[i].content = result.affectedpages.pages[
           i
