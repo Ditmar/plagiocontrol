@@ -167,6 +167,7 @@ function search(namefile) {
             ///[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?“”\–\¡\!]{60,}?(\.|\:|\,|\n)\s*/g
             /[\w\s\á\é\í\ó\ú\,\-\ñ\:\;\(\)\_\•\/\ü\?\“\”\–\¡\!\●]{60,}?(\.|\:|\,|\n)\s*/g
           );
+          
         if (lines != null) {
           RESULTS["totalLinesLen"] += lines.length;
           for (var j = 0; j < lines.length; j++) {
@@ -176,7 +177,9 @@ function search(namefile) {
                 var linesdata = new RegExp(lines[j]);
                 var result = await PAGES.findOne({ content: linesdata });
                 if (result != null) {
+                  
                   if (RESULTS["report"][result.idTesis] == null) {
+                    
                     RESULTS["report"][result.idTesis] = {
                       title: result.title,
                       autor: result.autor,
@@ -196,19 +199,33 @@ function search(namefile) {
                       number: i + 1,
                     });
                   }
-                  RESULTS["report"][result.idTesis].data.push({
-                    currentdoc: datasplit[i]
-                      .toLowerCase()
-                      .replace(
-                        new RegExp(lines[j].replace(/\s/g, `(\\s|\n)+`), "g"),
-                        `<span id="resaltar2">` + lines[j] + `</span>`
-                      ),
-                    currentpage: i + 1,
-                    numberpage: result.numberpage,
-                    linesmatch: linesdata.toString(),
-                    currectdocpage: i,
-                  });
+                  try {
+                    if (lines[j][0] == " ") {
+                      lines[j] = lines[j].substr(1, lines[j].length);
+                    }
+                    
+                    RESULTS["report"][result.idTesis].data.push({
+                      currentdoc: datasplit[i]
+                        .toLowerCase().toLowerCase()
+                        .replace(/\n/g, " ")
+                        .replace(/[\s]{2,}/g, " ")
+                        .replace(
+                          new RegExp(lines[j].replace(/\s/g, `(\\s|\n)+`), "g"),
+                          `<span id="resaltar2">` + lines[j] + `</span>`
+                        ),
+                      currentpage: i + 1,
+                      numberpage: result.numberpage,
+                      linesmatch: linesdata.toString(),
+                      currectdocpage: i,
+                    });
+                  } catch(error) {
+                    console.log("ERROR ALGO PASO ");
+                    console.log(error);
+                  }
+                  
+                  
                   matchlines++;
+                  
                   if (matchlines > 999) {
                     resolve(RESULTS);
                     return;
@@ -221,6 +238,7 @@ function search(namefile) {
           }
         }
       }
+      
       resolve(RESULTS);
     });
   });
@@ -232,8 +250,9 @@ async function indexofData(results) {
     finalreport["currentdoc"] = {};
     finalreport["comparativedocs"] = {};
     var keys = Object.keys(results);
-    
+    //var total = 
     for (var i = 0; i < keys.length; i++) {
+      io.emit("msn", {msn: "Creando reporte " + i });
       var docs = await TESIS.findOne({ _id: keys[i] });
       if (docs != null) {
         var dbdata = docs.toJSON();
@@ -243,10 +262,15 @@ async function indexofData(results) {
           var formatContent = originalcontent;
           formatContent = formatContent.toLowerCase().replace(/\//, "");
           var cad = results[keys[i]].data[j].linesmatch.substring(1, results[keys[i]].data[j].linesmatch.length - 1);
+          if (cad[0] == " ") {
+            cad = cad.substr(1, cad.length);
+          }
           var cad = cad
             .replace(/\s{2,}/g, " ");
           var expresion = cad.replace(/\s/g, `(\\s|\\n)+`);
           try {
+            
+            formatContent = formatContent.replace(/\n/g, " ").replace(/\s+/g, " ");
             var regx = new RegExp(expresion, "g");
             var matchdata = formatContent.match(regx);
             if (matchdata != null) {
@@ -314,10 +338,12 @@ router.post("/uploadreview", (req, res) => {
       }
       io.emit("msn", { msn: "Iniciando Revisión" });
       var result = await search(completename);
+      
       if (result == false) {
         res.render("error", {msn: "No se ha podido procesar el documento, puede que sea demasiado grande o este protegido"});
         return;
       }
+      io.emit("msn", {msn: "Creando Reporte"});
       await indexofData(result.report);
       io.emit("msn", { msn: "Revisión Culminada" });
       var keys = Object.keys(result.report);
@@ -332,7 +358,6 @@ router.post("/uploadreview", (req, res) => {
         //res.status(200).json({ msn: "No se han encontrado coincidencias" });
         return;
       }
-      console.log("ENTRA");
       var renderdata = {
         pagetotal: result.totalLinesLen,
         numberpages: result.numberpages,
@@ -343,25 +368,16 @@ router.post("/uploadreview", (req, res) => {
       io.emit("msn", { msn: "Resaltando colores" });
       renderdata["md5"] = hash;
       var reviewtotal = 0;
-      var modaltags = [
-        "resaltar2",
-        "resaltar3",
-        "resaltar4",
-        "resaltar5",
-        "resaltar6",
-      ];
-      var color = 0;
-      
       for (var i = 0; i < result.affectedpages.pages.length; i++) {
         for (var j = 0; j < keys.length; j++) {
           for (var k = 0; k < result.report[keys[j]].data.length; k++) {
-            console.log("Entra a los datos " + i +"," + j +","+ k + " <-");
             result.report[keys[j]].data[k]["modal_id"] = `modal_${j}_${k}`;
             var cad = result.report[keys[j]].data[k].linesmatch.substring(1, result.report[keys[j]].data[k].linesmatch.length - 1);
             var cad = cad
               .replace(/\s{2,}/g, " ");
             var expresion = cad.replace(/\s/g, `(\\s|\n)+`);
             var regx = new RegExp(expresion, "g");
+            result.affectedpages.pages[i].content = result.affectedpages.pages[i].content.replace(/\n/g, " ").replace(/\s+/," ")
             if (result.affectedpages.pages[i].content.match(regx) != null) {
               result.affectedpages.pages[
                 i
@@ -375,7 +391,6 @@ router.post("/uploadreview", (req, res) => {
                     cad +
                     `</span>`
                 );
-              color++;
             }
           }
         }
