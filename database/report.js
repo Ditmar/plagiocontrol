@@ -32,7 +32,9 @@ var reportSchema = new mongoose.Schema({
                     modal_id: String,
 
                 }
-            ]
+            ],
+            md5: String,
+            porcentaje: Number
         }
     ],
     md5: String,
