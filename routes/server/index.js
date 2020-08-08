@@ -3,8 +3,8 @@ var http = require("http").createServer(express());
 var mongoose = require("../../database/connect");
 var Schema = mongoose.Schema;
 var io = require("socket.io")(http);
-var thingSchema = new Schema({}, { strict: false });
-var REPORT = mongoose.model("report", thingSchema);
+var REPORT = require('../../database/report');
+//var thingSchema = new Schema({}, { strict: false });
 http.listen(3000, () => {
   console.log("SOCKET ON " + 3000);
 });
