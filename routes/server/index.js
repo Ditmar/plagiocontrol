@@ -51,15 +51,15 @@ router.post("/search", async (req, res) => {
     });
     return;
   }
-  var criteria = data.searchcriterion.toUpperCase();
+  var criteria = data.searchcriterion;
   //search by name
-  var searchcriterion = new RegExp(data.searchcriterion.toUpperCase(), "g");
+  var searchcriterion = new RegExp(data.searchcriterion, "i");
 
   var results = await TESIS.find({ autor: searchcriterion });
   if (results.length == 0) {
     var results = await TESIS.find({ title: searchcriterion });
     if (results.length == 0) {
-      var searchcriterion = new RegExp(data.searchcriterion.toLowerCase(), "g");
+      var searchcriterion = new RegExp(data.searchcriterion, "i");
 
       var results = await TESIS.find({ abstract: searchcriterion });
       results = puttagObjects(results, "abstract", searchcriterion, criteria);
@@ -442,7 +442,7 @@ router.get("/listdatabase", (req, res) => {
   var query = req.query;
   var filter = {};
   if (query.searchkey != null) {
-    filter["pages"] = new RegExp(query.searchkey, "g");
+    filter["pages"] = new RegExp(query.searchkey, "i");
   }
   var sort = { _id: -1 };
   if (query.sort != null) {
