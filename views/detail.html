@@ -37,6 +37,13 @@
             extracción</small>
         </div>
         <div class="form-group">
+          <label for="">Tutor del trabajo</label>
+          <input type="text" class="form-control" name="tutor" id="" aria-describedby="helpId" placeholder="Nombre del tutor"
+            value="{{tutor}}">
+          <small id="helpId" class="form-text text-muted">Puede actualizar el autor de ser incorrecta la
+            extracción</small>
+        </div>
+        <div class="form-group">
           <label for="">Número de páginas procesadas</label>
           <input disabled type="text" class="form-control" name="numberpage" id="" aria-describedby="helpId"
             placeholder="" value="{{numberpage}}">
@@ -48,6 +55,7 @@
             <label for=""></label>
             <select class="form-control" name="modalidad" id="modalidad" value="{{modalidad}}">
               <option value="Ninguno.">Ninguno.</option>
+              <option value="Perfil">Perfil</option>
               <option value="Tesis">Tesis</option>
               <option value="Proyecto de Grado">Proyecto de Grado</option>
               <option value="Monografías">Monografías</option>
@@ -210,6 +218,7 @@
   var formdata = document.getElementById("formdata");
   formdata.addEventListener("submit", (e) => {
     var data = formToJSON(formdata.elements);
+    console.log(data);
     e.preventDefault();
     var misCabeceras = new Headers();
     fetch("/server/updatebook", {

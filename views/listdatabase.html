@@ -4,6 +4,7 @@
       <div class="col-sm">
         <select class="form-control" name="modalidad" id="modalidad" value="{{modalidad}}">
           <option value="Todo.">Todo.</option>
+          <option value="Tesis">Perfil</option>
           <option value="Tesis">Tesis</option>
           <option value="Proyecto de Grado">Proyecto de Grado</option>
           <option value="Monografías">Monografías</option>
@@ -45,7 +46,7 @@
         <th scope="col">Modalidad</th>
         <th scope="col">Unidad Académica</th>
         <th scope="col">Cantidad de Páginas</th>
-        <th scope="col">Ver Trabajo</th>
+        <th scope="col">Editar Trabajo</th>
         <th scope="col">Descargar Trabajo<svg class="bi bi-arrow-up-short" width="1em" height="1em" viewBox="0 0 16 16"
             fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5z" />
@@ -59,10 +60,10 @@
       <tr>
         <th scope="row">{{number}}</th>
         <td><img src="/server{{coverpage}}" alt="" width="200px"></td>
-        <td>{{title}}</td>
+        <td>{{title}} <br><b>Tutor: </b> {{tutor}}</td>
         <td>
           <div class="card border-primary">
-            <img class="card-img-top" src="{{photo}}" alt="">
+            <img class="card-img-top" src="{{photo}}" alt="" width="200px">
             <div class="card-body">
               <p class="card-text">{{autor}}</p>
             </div>
@@ -73,7 +74,10 @@
         <td>{{unidad}}</td>
         <td>{{numpage}}</td>
         <td>
-          <a href="/#/detail/?id={{_id}}" class="editarBtn" hola="prueba">Editar</a>
+          <a href="/#/detail/?id={{_id}}" class="editarBtn" hola="prueba"> <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
+            <path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+          </svg></a>
         </td>
         <td>
           <a href="/server/viewdoc/{{md5}}" target="_blank">

@@ -709,7 +709,7 @@ router.post("/updatebook", async (req, res) => {
   var ok = await TESIS.update({ _id: body.id }, { $set: body });
   await PAGES.update(
     { idTesis: body.id },
-    { $set: { title: body.title, autor: body.autor } },
+    { $set: { title: body.title, autor: body.autor, tutor: body.tutor } },
     { multi: true }
   );
   res.status(200).json({ msn: "GO MAN" });

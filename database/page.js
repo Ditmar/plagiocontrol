@@ -5,7 +5,8 @@ var pageSchemas = new mongoose.Schema({
     idTesis: String,
     numberpage: Number,
     md5fromcontent: String,
-    content: String
+    content: String,
+    tutor: String
 });
 
 var PAGE = mongoose.model("pages", pageSchemas);
