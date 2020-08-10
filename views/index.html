@@ -215,7 +215,13 @@
     <script language="javascript" type="text/javascript" src="/js/source/jquery.flot.pie.js"></script>
     <script>
       console.log("IN HERE");
+      ROOMDATA = "";
       SOCKETDATA = io("http://localhost:3000");
+      SOCKETDATA.on("serverresponse", (data) => {
+        ROOMDATA = data;
+        console.log(ROOMDATA);
+        SOCKETDATA.emit("joinroom", ROOMDATA);
+      });
     </script>
   </body>
 </html>

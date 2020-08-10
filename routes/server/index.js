@@ -3,6 +3,7 @@ var http = require("http").createServer(express());
 var mongoose = require("../../database/connect");
 var Schema = mongoose.Schema;
 var io = require("socket.io")(http);
+var md5 = require("md5");
 var REPORT = require('../../database/report');
 //var thingSchema = new Schema({}, { strict: false });
 http.listen(3000, () => {
@@ -10,13 +11,20 @@ http.listen(3000, () => {
 });
 io.on("connection", (socket) => {
   console.log("usuario Conectado");
+  var generate = new Date();
+  generate = md5(generate.toString()).substr(0, 7);
+  socket.emit("serverresponse", generate);
+  socket.on("joinroom" , (data) => {
+    socket.join(data);
+    console.log(data);
+  });
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 });
 const fs = require("fs");
 var pdf2html = require("pdf2html");
-var md5 = require("md5");
+
 const md5File = require("md5-file");
 
 const fileUpload = require("express-fileupload");
@@ -120,7 +128,7 @@ function checkIsDuplicate(array, cad) {
   }
   return true;
 }
-function search(namefile) {
+function search(namefile, code) {
   return new Promise((resolve, refuse) => {
     var RESULTS = {};
     pdf2html.pages(namefile, options, async (err, htmlPages) => {
@@ -155,7 +163,7 @@ function search(namefile) {
       ];
       var tagcolor = 0;
       for (var i = 0; i < datasplit.length; i++) {
-        io.emit("msn", { msn: "Páginas procesadas " + i });
+        io.to(code).emit("msn", { msn: "Páginas procesadas " + i });
         var lines = datasplit[i]
           .replace(/\t/g, " ")
           .trim()
@@ -243,7 +251,7 @@ function search(namefile) {
     });
   });
 }
-async function indexofData(results) {
+async function indexofData(results, code) {
   return new Promise(async (resolve, reject) => {
     //Union de paginas similares.
     var finalreport = {};
@@ -252,7 +260,7 @@ async function indexofData(results) {
     var keys = Object.keys(results);
     //var total = 
     for (var i = 0; i < keys.length; i++) {
-      io.emit("msn", {msn: "Creando reporte " + i });
+      io.to(code).emit("msn", {msn: "Creando reporte " + i });
       var docs = await TESIS.findOne({ _id: keys[i] });
       if (docs != null) {
         var dbdata = docs.toJSON();
@@ -312,7 +320,12 @@ router.post("/uploadreview", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ msn: "No existen archivos para subir" });
   }
-  io.emit("msn", { msn: "Comenzando revisión" });
+  var code = "";
+  if (req.body.code != null ) {
+    code = req.body.code
+    io.to(code).emit("msn", { msn: "Comenzando revisión" });
+  }
+  
   var data = req.files;
   var rootpath = __dirname.replace(/routes\/server/g, "");
   var begintoken = new Date();
@@ -327,7 +340,7 @@ router.post("/uploadreview", (req, res) => {
       res.status(200).json({ msn: "ERROR: " + err });
       return;
     }
-    io.emit("msn", { msn: "Obteniendo Hash" });
+    io.to(code).emit("msn", { msn: "Obteniendo Hash" });
     md5File(completename).then(async (hash) => {
      
       var check = await REPORT.findOne({md5: hash});
@@ -336,20 +349,20 @@ router.post("/uploadreview", (req, res) => {
         res.render("reviewreport", check.toJSON());
         return;
       }
-      io.emit("msn", { msn: "Iniciando Revisión" });
-      var result = await search(completename);
+      io.to(code).emit("msn", { msn: "Iniciando Revisión" });
+      var result = await search(completename, code);
       
       if (result == false) {
         res.render("error", {msn: "No se ha podido procesar el documento, puede que sea demasiado grande o este protegido"});
         return;
       }
-      io.emit("msn", {msn: "Creando Reporte"});
-      await indexofData(result.report);
-      io.emit("msn", { msn: "Revisión Culminada" });
+      io.to(code).emit("msn", {msn: "Creando Reporte"});
+      await indexofData(result.report, code);
+      io.to(code).emit("msn", { msn: "Revisión Culminada" });
       var keys = Object.keys(result.report);
       console.log("Pasa el Object key");
       if (keys.length == 0) {
-        io.emit("msn", { msn: "Cerrando" });
+        io.to(code).emit("msn", { msn: "Cerrando" });
         res.render("goodfile", {
           filename: name,
           msn:
@@ -365,7 +378,7 @@ router.post("/uploadreview", (req, res) => {
         affectedpages: {},
         copy: [],
       };
-      io.emit("msn", { msn: "Resaltando colores" });
+      io.to(code).emit("msn", { msn: "Resaltando colores" });
       renderdata["md5"] = hash;
       var reviewtotal = 0;
       for (var i = 0; i < result.affectedpages.pages.length; i++) {
@@ -417,9 +430,9 @@ router.post("/uploadreview", (req, res) => {
       }
       var report = new REPORT(renderdata);
       console.log(renderdata);
-      io.emit("msn", { msn: "Almacenando Reporte en la Base de Datos" });
+      io.to(code).emit("msn", { msn: "Almacenando Reporte en la Base de Datos" });
       report.save().then(() => {
-        io.emit("msn", { msn: "Terminado" });
+        io.to(code).emit("msn", { msn: "Terminado" });
         res.render("reviewreport", renderdata);
       });
     });
@@ -538,7 +551,12 @@ router.post("/upload", (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ msn: "No existen archivos para subir" });
   }
-  io.emit("msn", { msn: "Archivo enviado al servidor con éxito!" });
+  console.log(req.body);
+  var code = "";
+  if (req.body.code != null) {
+    code  = req.body.code;
+    io.to(code).emit("msn", { msn: "Archivo enviado al servidor con éxito!" });
+  }
   var data = req.files;
   var rootpath = __dirname.replace(/routes\/server/g, "");
   //res.status(200).json({msn: "LOAD!"});
@@ -557,7 +575,7 @@ router.post("/upload", (req, res) => {
         .json({ msn: "ERROR AL ESCRIBIR EL ARCHIVO EN EL SERVIDOR" });
     }
     const dataop = { page: 1, imageType: "png", width: 160, height: 226 };
-    io.emit("msn", { msn: "Parseando archivos" });
+    io.to(code).emit("msn", { msn: "Parseando archivos" });
     pdf2html.thumbnail(completename, (err, thumbnailPath) => {
       if (err) {
         console.error("Conversion error: " + err);
@@ -606,7 +624,7 @@ router.post("/upload", (req, res) => {
           }
           md5File(completename).then(async (hash) => {
             var check = await TESIS.find({ md5: hash });
-            io.emit("msn", { msn: "Enviado a la base de datos" });
+            io.to(code).emit("msn", { msn: "Enviado a la base de datos" });
             if (check.length > 0) {
               res.json({ msn: "La tesis ya existe en la base de datos" });
               return;
@@ -643,7 +661,7 @@ router.post("/upload", (req, res) => {
                 });
                 page.save(() => {
                   countcheck++;
-                  io.emit("msn", { msn: "Páginas parseadas " + countcheck });
+                  io.to(code).emit("msn", { msn: "Páginas parseadas " + countcheck });
                   if (countcheck == pagedata.length - 1) {
                     pagedata = pagedata.map((content, k) => {
                       var obj = {};

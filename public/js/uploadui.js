@@ -1,7 +1,8 @@
 class UploadUi {
-    constructor(path, socket, callback) {
+    constructor(path, socket, code,callback) {
       this.path = path;
       this.data = null;
+      this.code  = code;
         this.dropzone = document.getElementById('drop-zone');
         this.defaultmsn = document.getElementById('defaultmsn');
         this.fileicon = document.getElementsByClassName('filesicon');
@@ -105,6 +106,7 @@ class UploadUi {
               this.data = new FormData()
               this.data.append('file', files[0])
               this.data.append('user', 'hubot')
+              this.data.append('code', this.code);
               /*fetch(this.path, { // Your POST endpoint
                   method: 'POST',
                   body: data // This is your file object

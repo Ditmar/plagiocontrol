@@ -22,7 +22,7 @@
 <script type="module">
   import { UploadUi } from  "/js/uploadui.js";
   //var socket = io();
-  var p = new UploadUi("/server/uploadreview", SOCKETDATA, (data) => {
+  var p = new UploadUi("/server/uploadreview", SOCKETDATA, ROOMDATA, (data) => {
     
     $("#maincontent").html(data);
   });

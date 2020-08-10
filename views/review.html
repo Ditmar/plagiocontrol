@@ -19,7 +19,7 @@
 <script src="/js/uploadui.js" type="module"></script>
 <script type="module">
   import { UploadUi } from  "/js/uploadui.js";
-  var p = new UploadUi("/server/upload", SOCKETDATA, (data) => {
+  var p = new UploadUi("/server/upload", SOCKETDATA, ROOMDATA,(data) => {
     $("#maincontent").html(data);
   });
 </script>
