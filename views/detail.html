@@ -38,8 +38,8 @@
         </div>
         <div class="form-group">
           <label for="">Tutor del trabajo</label>
-          <input type="text" class="form-control" name="tutor" id="" aria-describedby="helpId" placeholder="Nombre del tutor"
-            value="{{tutor}}">
+          <input type="text" class="form-control" name="tutor" id="" aria-describedby="helpId"
+            placeholder="Nombre del tutor" value="{{tutor}}">
           <small id="helpId" class="form-text text-muted">Puede actualizar el tutor de ser incorrecta la
             extracción</small>
         </div>
@@ -59,6 +59,7 @@
               <option value="Tesis">Tesis</option>
               <option value="Proyecto de Grado">Proyecto de Grado</option>
               <option value="Monografías">Monografías</option>
+              <option value="bancodetemas">Banco de Temas</option>
             </select>
           </div>
           <small id="helpId" class="form-text text-muted"></small>
@@ -185,24 +186,24 @@
     e.preventDefault();
     $("#alertboxdelete").modal('hide');
     document.getElementById("myNav").style.width = "100%";
-    setTimeout(function(){  
+    setTimeout(function () {
       fetch("/server/deletedocs/{{id}}", {
-      method: "POST"
-    }).then(
-      response => response.text()// if the response is a JSON object
-    ).then(
-      success => {
-         $("#maincontent").html(success);
-         document.getElementById("myNav").style.width = "0%";
-      }
-    );
+        method: "POST"
+      }).then(
+        response => response.text()// if the response is a JSON object
+      ).then(
+        success => {
+          $("#maincontent").html(success);
+          document.getElementById("myNav").style.width = "0%";
+        }
+      );
     }, 2000);
     /**/
-  })
+  });
   $("#deleteClick").on("click", (e) => {
     e.preventDefault();
     $("#alertboxdelete").modal('show');
-  })
+  });
   var p = new UploadUi("/server/uploadphoto/?idTesis={{id}}", SOCKETDATA, (data) => {
     var json = JSON.parse(data);
     $('#uploaddata').modal('hide');
